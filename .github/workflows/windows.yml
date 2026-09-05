@@ -25,15 +25,33 @@ jobs:
         with:
           path: friction/src/plugins
 
-      - name: Build
+      - name: Download Friction SDK
         working-directory: friction
-        shell: cmd
-        run: .\src\scripts\build.bat ci
+        shell: pwsh
+        run: |
+          Invoke-WebRequest `
+            https://github.com/friction2d/friction-sdk/releases/download/v1.0.0/friction-sdk-1.0.0r7-windows-x64.7z `
+            -OutFile friction-sdk.7z
+          7z x friction-sdk.7z
+
+      - name: Configure plugin
+        working-directory: friction
+        shell: pwsh
+        run: |
+          cmake -S . -B build-plugin -G "Visual Studio 17 2022" -A x64 `
+            -DCMAKE_PREFIX_PATH="$pwd/sdk" `
+            -DCMAKE_BUILD_TYPE=Release `
+            -DBUILD_SKIA=OFF `
+            -DSKIA_LIB_PATH="$pwd/sdk/lib"
+
+      - name: Build plugin
+        working-directory: friction
+        run: cmake --build build-plugin --config Release --target SvgImportPlugin
 
       - name: Collect SVG import plugin
         shell: pwsh
         run: |
-          $plugins = @(Get-ChildItem -Path friction/build/src/app/plugins -Recurse -Filter SvgImportPlugin.dll)
+          $plugins = @(Get-ChildItem -Path friction/build-plugin/src/app/plugins -Recurse -Filter SvgImportPlugin.dll)
           if ($plugins.Count -ne 1) {
             throw "Expected one SvgImportPlugin.dll, found $($plugins.Count)."
           }
@@ -45,13 +63,4 @@ jobs:
         with:
           name: svg-import-plugin-windows-x64
           path: plugin-artifacts/windows/SvgImportPlugin.dll
-          if-no-files-found: error
-
-      - name: Upload Friction packages
-        uses: actions/upload-artifact@v4
-        with:
-          name: friction-with-svg-import-windows-x64
-          path: |
-            friction/build/output/friction-*.7z
-            friction/build/output/friction-*.exe
           if-no-files-found: error
