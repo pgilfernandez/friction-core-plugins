@@ -25,11 +25,18 @@ jobs:
         with:
           path: friction/src/plugins
 
+      - name: Download Friction SDK
+        run: |
+          curl -fLO https://github.com/friction2d/friction-sdk/releases/download/v1.0.0/friction-sdk-1.0.0r15-linux-x86_64.tar.xz
+          mkdir -p linux-sdk
+          tar -xf friction-sdk-1.0.0r15-linux-x86_64.tar.xz -C linux-sdk
+
       - name: Build plugin with the official Linux image
         run: |
           docker pull frictiongraphics/friction-vfxplatform-sdk
           docker run --rm \
             --mount type=bind,source="${{ github.workspace }}/friction",target=/root/friction \
+            --mount type=bind,source="${{ github.workspace }}/linux-sdk/friction",target=/opt/friction,readonly \
             --workdir /root/friction \
             frictiongraphics/friction-vfxplatform-sdk \
             bash -lc '
