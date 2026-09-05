@@ -38,6 +38,7 @@ jobs:
       - name: Build ARM64 plugin
         working-directory: friction
         run: |
+          export PATH="$PWD/sdk/arm64/bin:/usr/bin:/bin:/usr/sbin:/sbin"
           cmake -S . -B build-plugin-arm64 -G Ninja \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
             -DCMAKE_PREFIX_PATH="$PWD/sdk/arm64" \
@@ -51,6 +52,7 @@ jobs:
       - name: Build Intel plugin
         working-directory: friction
         run: |
+          export PATH="$PWD/sdk/x86_64/bin:/usr/bin:/bin:/usr/sbin:/sbin"
           arch -x86_64 cmake -S . -B build-plugin-x86_64 -G Ninja \
             -DCMAKE_OSX_DEPLOYMENT_TARGET=11.0 \
             -DCMAKE_PREFIX_PATH="$PWD/sdk/x86_64" \
