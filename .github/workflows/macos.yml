@@ -1,0 +1,54 @@
+name: macOS
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - name: Check out Friction
+        uses: actions/checkout@v4
+        with:
+          repository: friction2d/friction
+          ref: core-plugins
+          path: friction
+          submodules: recursive
+
+      - name: Check out core plugins
+        uses: actions/checkout@v4
+        with:
+          path: friction/src/plugins
+
+      - name: Build ARM64 and Intel packages
+        working-directory: friction
+        run: |
+          BUILD_UNIVERSAL=0 BUILD_ARM=1 BUILD_INTEL=1 \
+            ./src/scripts/build_mac_ci.sh
+
+      - name: Create universal SVG import plugin
+        run: |
+          mkdir -p plugin-artifacts/macos
+          lipo -create \
+            friction/build-release-arm64/dmg/Friction.app/Contents/MacOS/plugins/SvgImportPlugin.so \
+            friction/build-release-x86_64/dmg/Friction.app/Contents/MacOS/plugins/SvgImportPlugin.so \
+            -output plugin-artifacts/macos/SvgImportPlugin.so
+          lipo -info plugin-artifacts/macos/SvgImportPlugin.so
+
+      - name: Upload SVG import plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: svg-import-plugin-macOS-universal
+          path: plugin-artifacts/macos/SvgImportPlugin.so
+          if-no-files-found: error
+      - name: Upload Friction packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: friction-with-svg-import-macOS
+          path: friction/build-release-*/*.dmg
+          if-no-files-found: error

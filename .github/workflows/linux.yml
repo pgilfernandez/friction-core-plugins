@@ -1,0 +1,57 @@
+name: Linux
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out Friction
+        uses: actions/checkout@v4
+        with:
+          repository: friction2d/friction
+          ref: core-plugins
+          path: friction
+          submodules: recursive
+
+      - name: Check out core plugins
+        uses: actions/checkout@v4
+        with:
+          path: friction/src/plugins
+
+      - name: Build with the official Linux image
+        run: |
+          mkdir -p friction/distfiles/builds friction/distfiles/sdk
+          docker pull frictiongraphics/friction-vfxplatform-sdk
+          docker run --rm \
+            --env CUSTOM=Plugin-CI \
+            --env REL=0 \
+            --mount type=bind,source="${{ github.workspace }}/friction",target=/root/friction \
+            --mount type=bind,source="${{ github.workspace }}/friction/distfiles",target=/mnt \
+            frictiongraphics/friction-vfxplatform-sdk
+
+      - name: Collect SVG import plugin
+        run: |
+          mkdir -p plugin-artifacts/linux
+          cp friction/build-vfxplatform/src/app/plugins/SvgImportPlugin.so \
+            plugin-artifacts/linux/SvgImportPlugin.so
+          file plugin-artifacts/linux/SvgImportPlugin.so
+
+      - name: Upload SVG import plugin
+        uses: actions/upload-artifact@v4
+        with:
+          name: svg-import-plugin-linux-x86_64
+          path: plugin-artifacts/linux/SvgImportPlugin.so
+          if-no-files-found: error
+      - name: Upload Friction packages
+        uses: actions/upload-artifact@v4
+        with:
+          name: friction-with-svg-import-linux-x86_64
+          path: friction/distfiles/builds/*/*
+          if-no-files-found: error
