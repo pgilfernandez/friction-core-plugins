@@ -15,8 +15,8 @@ jobs:
       - name: Check out Friction
         uses: actions/checkout@v4
         with:
-          repository: friction2d/friction
-          ref: core-plugins
+          repository: pgilfernandez/friction
+          ref: core-plugins-import-animated-svg-v1
           path: friction
           submodules: recursive
 

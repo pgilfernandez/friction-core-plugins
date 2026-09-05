@@ -46,8 +46,6 @@
 #include "exceptions.h"
 #include "svgimporter.h"
 
-qsptr<ImageBox> createImageBox(const QString& path);
-
 namespace {
 
 struct AnimationTrack {
@@ -611,7 +609,7 @@ void replaceImagePlaceholders(BoundingBox* const root,
         }
         if (!placeholderRef) { continue; }
 
-        const auto image = createImageBox(candidate.path);
+        const auto image = enve::make_shared<ImageBox>(candidate.path);
         placeholder->copyBoundingBoxDataTo(image.get());
         image->prp_setName(candidate.name);
         group->replaceContained(placeholderRef, image);
