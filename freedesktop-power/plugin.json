@@ -1,0 +1,9 @@
+{
+    "id": "graphics.friction.plugin.freedesktop.power",
+    "name": "Linux Power Manager",
+    "version": "1.0.0",
+    "author": "Ole-André Rodlie",
+    "description": "Will inhibit screen off during playback and inhibit suspend during rendering on Linux.",
+    "group": "System",
+    "api": "graphics.friction.CorePluginInterface/1.0"
+}
