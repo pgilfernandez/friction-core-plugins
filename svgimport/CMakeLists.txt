@@ -11,6 +11,14 @@ friction_add_plugin(${PROJECT_NAME}
     svganimationimporter.h
 )
 
+target_include_directories(${PROJECT_NAME} PRIVATE
+    $<TARGET_PROPERTY:frictioncore,INCLUDE_DIRECTORIES>
+)
+
+target_link_directories(${PROJECT_NAME} PRIVATE
+    $<TARGET_PROPERTY:frictioncore,LINK_DIRECTORIES>
+)
+
 if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE skia user32 opengl32)
 else()
